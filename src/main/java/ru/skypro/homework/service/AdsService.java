@@ -8,6 +8,5 @@ import ru.skypro.homework.dto.CreateOrUpdateAd;
 public interface AdsService {
     Ads getAllAds();
 
-    // Добавьте эту строку:
     Ad addAd(CreateOrUpdateAd properties, MultipartFile image);
 }

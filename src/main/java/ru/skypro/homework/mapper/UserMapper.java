@@ -10,6 +10,6 @@ public interface UserMapper {
     @Mapping(target = "image", expression = "java(userEntity.getImage() != null ? \"/users/image/\" + userEntity.getId() : null)")
     User toDto(UserEntity userEntity);
 
-    // Должен возвращать Entity!
+
     UserEntity toEntity(User userDto);
 }

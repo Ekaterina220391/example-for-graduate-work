@@ -8,8 +8,8 @@ import ru.skypro.homework.model.CommentEntity;
 public interface CommentMapper {
 
     @Mapping(target = "author", source = "author.id")
-    @Mapping(target = "authorImage", expression = "java(comment.getAuthor().getImage() != null ? \"/users/image/\" + comment.getAuthor().getId() : null)")
+    @Mapping(target = "authorImage", expression = "java(commentEntity.getAuthor().getImage() != null ? \"/users/image/\" + commentEntity.getAuthor().getId() : null)")
     @Mapping(target = "authorFirstName", source = "author.firstName")
     @Mapping(target = "pk", source = "id")
-    Comment toDto(Comment comment);
+    Comment toDto(CommentEntity commentEntity);
 }

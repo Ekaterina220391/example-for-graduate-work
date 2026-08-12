@@ -15,6 +15,7 @@ import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.io.IOException;
 import java.util.List;
@@ -116,7 +117,7 @@ public class AdsServiceImpl implements AdsService {
         boolean isOwner = ad.getAuthor().getEmail().equals(authentication.getName());
 
         if (!isAdmin && !isOwner) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No permission");
+            throw new AccessDeniedException("No permission");
         }
     }
 }

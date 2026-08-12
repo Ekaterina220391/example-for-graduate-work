@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
@@ -74,10 +75,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private void checkPermission(CommentEntity comment, Authentication authentication) {
+        // 1. Проверяем, является ли пользователь админом
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (!comment.getAuthor().getEmail().equals(authentication.getName()) && !isAdmin) {
-            throw new RuntimeException("No permission");
+
+        // 2. Проверяем, является ли пользователь автором комментария
+        // Сравниваем email автора комментария с именем (email-ом) текущего пользователя
+        boolean isOwner = comment.getAuthor().getEmail().equals(authentication.getName());
+
+        // 3. Если не админ и не автор — выкидываем исключение
+        if (!isAdmin && !isOwner) {
+            throw new AccessDeniedException("No permission");
         }
     }
-}
+    }

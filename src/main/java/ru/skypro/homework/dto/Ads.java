@@ -8,7 +8,7 @@ import java.util.List;
 public class Ads {
 
     @Schema(description = "общее количество объявлений")
-    private Integer count;
+    private Long count;
 
     @Schema(description = "список объявлений")
     private List<Ad> results;

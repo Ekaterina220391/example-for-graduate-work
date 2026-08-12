@@ -7,16 +7,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Ad {
 
     @Schema(description = "id автора объявления")
-    private Integer author;
+    private Long author;
 
     @Schema(description = "ссылка на картинку объявления")
     private String image;
 
     @Schema(description = "id объявления")
-    private Integer pk;
+    private Long pk;
 
     @Schema(description = "цена объявления")
-    private Integer price;
+    private Long price;
 
     @Schema(description = "заголовок объявления")
     private String title;

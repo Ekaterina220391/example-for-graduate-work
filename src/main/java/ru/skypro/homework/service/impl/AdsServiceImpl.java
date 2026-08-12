@@ -2,17 +2,16 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.Ad;
-import ru.skypro.homework.dto.Ads;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.dto.ExtendedAd;
-import ru.skypro.homework.mapper.AdMapper;
+import org.springframework.web.server.ResponseStatusException;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
@@ -33,31 +32,19 @@ public class AdsServiceImpl implements AdsService {
     public Ads getAllAds() {
         List<AdEntity> adEntities = adRepository.findAll();
         Ads ads = new Ads();
-        ads.setCount(adEntities.size());
+        ads.setCount((long) adEntities.size());
         ads.setResults(adMapper.toAdDtoList(adEntities));
         return ads;
-    }
-
-    @Override
-    public Ad addAd(CreateOrUpdateAd properties, MultipartFile image, org.apache.tomcat.util.net.openssl.ciphers.Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
-        return null;
     }
 
     @Transactional
     @Override
     public Ad addAd(CreateOrUpdateAd properties, MultipartFile image, Authentication authentication) {
         UserEntity author = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         AdEntity adEntity = adMapper.toEntity(properties);
         adEntity.setAuthor(author);
-
-
         adEntity.setImage(image.getOriginalFilename());
 
         adRepository.save(adEntity);
@@ -65,54 +52,71 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ExtendedAd getAds(Integer id) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
+    public ExtendedAd getAds(Long id) {
+        AdEntity ad = adRepository.findById(id) // Убрали Long.valueOf
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
         return adMapper.toExtendedDto(ad);
     }
 
     @Transactional
     @Override
-    public void removeAd(Integer id) {
-        adRepository.deleteById(id);
+    public void removeAd(Long id, Authentication authentication) {
+        AdEntity ad = adRepository.findById(id) // Убрали Long.valueOf
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkPermission(ad, authentication);
+        adRepository.delete(ad);
     }
 
     @Transactional
     @Override
-    public Ad updateAds(Integer id, CreateOrUpdateAd properties) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
+    public Ad updateAds(Long id, CreateOrUpdateAd properties, Authentication authentication) {
+        AdEntity ad = adRepository.findById(id) // Убрали Long.valueOf
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkPermission(ad, authentication);
 
         ad.setTitle(properties.getTitle());
         ad.setPrice(properties.getPrice());
         ad.setDescription(properties.getDescription());
 
-        return adMapper.toDto(adRepository.save(ad));
+        adRepository.save(ad);
+        return adMapper.toDto(ad);
     }
 
     @Override
     public Ads getAdsMe(Authentication authentication) {
         List<AdEntity> myAds = adRepository.findAllByAuthorEmail(authentication.getName());
         Ads ads = new Ads();
-        ads.setCount(myAds.size());
+        ads.setCount((long) myAds.size());
         ads.setResults(adMapper.toAdDtoList(myAds));
         return ads;
     }
 
     @Transactional
     @Override
-    public byte[] updateImage(Integer id, MultipartFile image) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
+    public byte[] updateImage(Long id, MultipartFile image, Authentication authentication) {
+        AdEntity ad = adRepository.findById(id) // Убрали Long.valueOf
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkPermission(ad, authentication);
 
         try {
-            byte[] imageBytes = image.getBytes();
-            ad.setImage(image.getOriginalFilename()); // Или путь к файлу
+            ad.setImage(image.getOriginalFilename());
             adRepository.save(ad);
-            return imageBytes;
+            return image.getBytes();
         } catch (IOException e) {
-            log.error("Error updating image", e);
-            throw new RuntimeException("Failed to update image");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error saving image");
+        }
+    }
+
+    private void checkPermission(AdEntity ad, Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isOwner = ad.getAuthor().getEmail().equals(authentication.getName());
+
+        if (!isAdmin && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No permission");
         }
     }
 }

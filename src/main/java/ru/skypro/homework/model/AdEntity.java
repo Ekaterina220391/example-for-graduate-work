@@ -10,9 +10,9 @@ import javax.persistence.*;
 public class AdEntity { // Исправил имя
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private Integer price;
+    private Long price;
     private String title;
     private String description;
 

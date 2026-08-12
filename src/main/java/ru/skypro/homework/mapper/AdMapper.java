@@ -4,7 +4,7 @@ import org.mapstruct.Mapping;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.model.AdEntity;
-import ru.skypro.homework.model.AdEntity;
+
 
 import java.util.List;
 

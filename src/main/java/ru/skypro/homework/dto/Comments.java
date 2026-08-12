@@ -6,6 +6,6 @@ import java.util.List;
 @Data
 
 public class Comments {
-    private Integer count;
+    private Long count;
     private List<Comment> results;
 }

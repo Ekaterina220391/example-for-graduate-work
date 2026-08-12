@@ -17,7 +17,7 @@ public class CreateOrUpdateAd {
     @Schema(description = "цена объявления")
     @Min(0)
     @Max(10000000)
-    private Integer price;
+    private Long price;
 
     @Schema(description = "описание объявления")
     @Size(min = 8, max = 64)

@@ -8,7 +8,7 @@ import lombok.Data;
 public class Comment {
 
     @Schema(description = "id автора комментария")
-    private Integer author;
+    private Long author;
 
     @Schema(description = "ссылка на аватар автора комментария")
     private String authorImage;
@@ -20,7 +20,7 @@ public class Comment {
     private Long createdAt;
 
     @Schema(description = "id комментария")
-    private Integer pk;
+    private Long pk;
 
     @Schema(description = "текст комментария")
     private String text;

@@ -7,7 +7,8 @@ import ru.skypro.homework.model.UserEntity;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "image", expression = "java(userEntity.getImage() != null ? \"/users/image/\" + userEntity.getId() : null)")
+
+    @Mapping(target = "image", source = "image")
     User toDto(UserEntity userEntity);
 
     UserEntity toEntity(User userDto);

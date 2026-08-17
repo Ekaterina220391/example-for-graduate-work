@@ -10,10 +10,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface AdMapper {
-
     @Mapping(target = "author", source = "adEntity.author.id")
     @Mapping(target = "pk", source = "adEntity.id")
-    @Mapping(target = "image", expression = "java(\"/ads/image/\" + adEntity.getId())")
+    @Mapping(target = "image", source = "image") // Просто копируем путь из сущности
     Ad toDto(AdEntity adEntity);
 
     @Mapping(target = "authorFirstName", source = "adEntity.author.firstName")
@@ -21,7 +20,7 @@ public interface AdMapper {
     @Mapping(target = "email", source = "adEntity.author.email")
     @Mapping(target = "phone", source = "adEntity.author.phone")
     @Mapping(target = "pk", source = "adEntity.id")
-    @Mapping(target = "image", expression = "java(\"/ads/image/\" + adEntity.getId())")
+    @Mapping(target = "image", source = "image") // Просто копируем путь
     ExtendedAd toExtendedDto(AdEntity adEntity);
     List<Ad> toAdDtoList(List<AdEntity> adEntities);
 

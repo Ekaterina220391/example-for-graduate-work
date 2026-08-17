@@ -22,17 +22,18 @@ public class WebSecurityConfig {
             "/webjars/**",
             "/login",
             "/register",
-            "/ads/image/**", // Разрешаем просмотр картинок без авторизации
-            "/users/image/**"
+            "/images/**"
     };
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
-                        .antMatchers(HttpMethod.GET, "/ads").permitAll() // Просмотр объявлений всем
-                        .antMatchers("/ads/**", "/users/**").authenticated() // Остальное — по логину
+                        .antMatchers(HttpMethod.GET, "/ads").permitAll() // Просмотр разрешен всем
+                        // Явно ограничиваем доступ ролями для всех остальных эндпоинтов ads и users
+                        .antMatchers("/ads/**", "/users/**").hasAnyRole("USER", "ADMIN")
                 )
                 .cors().and()
                 .httpBasic(withDefaults());
